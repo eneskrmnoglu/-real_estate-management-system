@@ -36,12 +36,17 @@ namespace server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<RealEstate>> CreateRealEstate(RealEstate realEstate)
-        {
-            await repository.CreateAsync(realEstate);
-            await repository.SaveChangesAsync();
-            return CreatedAtAction(nameof(realEstate), new {id = realEstate.Id}, realEstate);
-        }
+public async Task<ActionResult<RealEstate>> CreateRealEstate(RealEstate realEstate)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    await repository.CreateAsync(realEstate);
+    await repository.SaveChangesAsync();
+    return CreatedAtAction(nameof(realEstate), new { id = realEstate.Id }, realEstate);
+}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRealEstate(Guid id, RealEstate realEstate)

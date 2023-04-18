@@ -1,7 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/userSlice";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 function Login() {
+  const [mail, setMail] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5298/api/Users/login?email=${mail}&password=${password}`
+      );
+      if (response.data) {
+        const user = response.data;
+        console.log(user);
+        dispatch(setUser(user));
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Giriş işlemi başarılı.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/anasayfa");
+      } else {
+        Swal.fire("Kullanıcı adı veya şifre hatalı");
+      }
+    } catch (error) {
+      Swal.fire(error);
+    }
+  };
+
   return (
     <>
       <div className="bg-gray-100">
@@ -39,7 +76,7 @@ function Login() {
                 <p className="mt-3 text-gray-500">Hesabınıza Giriş Yapın !</p>
               </div>
               <div className="mt-8">
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div>
                     <label
                       htmlFor="email"
@@ -51,6 +88,8 @@ function Login() {
                       type="email"
                       name="email"
                       id="email"
+                      value={mail}
+                      onChange={(e) => setMail(e.target.value)}
                       placeholder="example@example.com"
                       className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg  focus:border-blue-400  focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"
                     />
@@ -74,12 +113,17 @@ function Login() {
                       type="password"
                       name="password"
                       id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="Your Password"
                       className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg tfocus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"
                     />
                   </div>
                   <div className="mt-6">
-                    <button className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50">
+                    <button
+                      type="submit"
+                      className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
+                    >
                       Giriş Yap
                     </button>
                   </div>

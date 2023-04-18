@@ -10,22 +10,28 @@ import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import Advertise from "./pages/Advertise";
 
 function App() {
   return (
     <div className="App">
-      <Banner />
-      <Navbar />
-      <Routes>
-        <Route path="/anasayfa" element={<Hero />} />
-        <Route path="/ekip" element={<Team />} />
-        <Route path="/hakkimizda" element={<AboutUs />} />
-        <Route path="/iletisim" element={<Contact />} />
-        <Route path="/girisyap" element={<Login />} />
-        <Route path="/kayitol" element={<Register />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Footer />
+      <Provider store={store}>
+        <Banner />
+        <Navbar />
+        <Routes>
+          <Route path="/anasayfa" element={<Hero />} />
+          <Route path="/ekip" element={<Team />} />
+          <Route path="/hakkimizda" element={<AboutUs />} />
+          <Route path="/iletisim" element={<Contact />} />
+          <Route path="/girisyap" element={<Login />} />
+          <Route path="/kayitol" element={<Register />} />
+          <Route path="*" element={<NotFound />} />
+          <Route path="/ilanver" element={<Advertise />} />
+        </Routes>
+        <Footer />
+      </Provider>
     </div>
   );
 }

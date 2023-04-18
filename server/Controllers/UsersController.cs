@@ -18,6 +18,19 @@ namespace server.Controllers
             this.repository = repository;
         }
 
+        // GET: http://localhost:5298/api/Users/login?email={email}&password={password}
+        [HttpGet("login")]
+        public async Task<ActionResult<User>> GetUserByEmailAndPassword(string email, string password)
+        {
+            var users = await repository.GetAllAsync();
+            var user = users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            if(user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
         // GET: http://localhost:5298/api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
