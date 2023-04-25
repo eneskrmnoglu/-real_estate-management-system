@@ -1,5 +1,15 @@
 import React from "react";
 import { SortAscendingIcon, UsersIcon } from "@heroicons/react/solid";
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { setRealEstates } from "../redux/realEstateSlice";
+import axios from "axios";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  filterRealEstatesByCity,
+  filterRealEstatesByName,
+} from "../redux/realEstateSlice";
 
 const categories = [
   {
@@ -30,6 +40,37 @@ const categories = [
 ];
 
 function Hero() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const realEstates = useSelector((state) => state.realEstate.realEstates);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    dispatch(filterRealEstatesByName(searchTerm));
+    navigate("/emlaklar");
+  };
+
+  const fetchRealEstates = async () => {
+    try {
+      const response = await axios.get("http://localhost:5298/api/RealEstate");
+      console.log(response.data);
+      dispatch(setRealEstates(response.data));
+    } catch (error) {
+      console.error("Gayrimenkul verileri alınırken hata oluştu:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealEstates();
+  }, []);
+
+  const handleCategoryClick = (categoryName) => {
+    dispatch(filterRealEstatesByCity(categoryName));
+    navigate("/emlaklar");
+  };
+
   return (
     <>
       <div className="bg-white">
@@ -62,7 +103,10 @@ function Hero() {
                       aradığını kolayca bul. Kiralık ve satılık binlerce ev,
                       işyeri ve arsa ilanı Zillow'da.
                     </p>
-                    <form className="mt-2 flex items-center w-1/3 mx-auto">
+                    <form
+                      className="mt-2 flex items-center w-1/3 mx-auto"
+                      onSubmit={handleSearch}
+                    >
                       <label htmlFor="simple-search" className="sr-only">
                         İsim, adres veya şehir ismi giriniz.
                       </label>
@@ -87,6 +131,8 @@ function Hero() {
                           id="simple-search"
                           className="bg-white-50 border border-white-300 text-white-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block w-full pl-10 p-2.5  dark:bg-white-700 dark:border-white-600 dark:placeholder-white-400 dark:text-gray-500 dark:focus:ring-white-500 dark:focus:border-white-500"
                           placeholder="İsim, adres veya şehir ismi giriniz."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
                           required
                         />
                       </div>
@@ -127,35 +173,30 @@ function Hero() {
                     <img
                       className="h-12"
                       src="https://seeklogo.com/images/N/nef-logo-1A2FE5E968-seeklogo.com.png"
-                      alt="Tuple"
                     />
                   </div>
                   <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
                     <img
                       className="h-12"
                       src="https://seeklogo.com/images/T/toki-logo-B70BBFCF82-seeklogo.com.png"
-                      alt="Mirage"
                     />
                   </div>
                   <div className="col-span-1 flex justify-center md:col-span-2 lg:col-span-1">
                     <img
                       className="h-12"
                       src="https://seeklogo.com/images/E/emlak-konut-logo-201CCBAE4D-seeklogo.com.png"
-                      alt="StaticKit"
                     />
                   </div>
                   <div className="col-span-1 flex justify-center md:col-span-2 md:col-start-2 lg:col-span-1">
                     <img
                       className="h-12"
                       src="https://seeklogo.com/images/S/sinpas-insaat-yapi-logo-575B4C20AF-seeklogo.com.png"
-                      alt="Transistor"
                     />
                   </div>
                   <div className="col-span-2 flex justify-center md:col-span-2 md:col-start-4 lg:col-span-1">
                     <img
                       className="h-12"
                       src="https://seeklogo.com/images/L/limak_holding-logo-D528CE20DA-seeklogo.com.png"
-                      alt="Workcation"
                     />
                   </div>
                 </div>
@@ -183,6 +224,10 @@ function Hero() {
                         key={category.name}
                         href={category.href}
                         className="relative w-56 h-80 rounded-lg p-6 flex flex-col overflow-hidden hover:opacity-75 xl:w-auto"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCategoryClick(category.name);
+                        }}
                       >
                         <span aria-hidden="true" className="absolute inset-0">
                           <img
@@ -201,19 +246,29 @@ function Hero() {
                       </a>
                     ))}
                   </div>
+
+                  <div className="mt-6 sm:hidden">
+                    <a
+                      href="#"
+                      className="block text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+                    >
+                      Browse all categories
+                      <span aria-hidden="true"> &rarr;</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 px-4 sm:hidden">
-              <a
-                href="#"
-                className="block text-sm font-semibold text-indigo-600 hover:text-indigo-500"
-              >
-                Browse all categories<span aria-hidden="true"> &rarr;</span>
-              </a>
-            </div>
           </div>
+        </div>
+
+        <div className="mt-6 px-4 sm:hidden">
+          <a
+            href="#"
+            className="block text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+          >
+            Browse all categories<span aria-hidden="true"> &rarr;</span>
+          </a>
         </div>
       </div>
     </>

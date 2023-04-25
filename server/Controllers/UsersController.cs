@@ -74,7 +74,7 @@ namespace server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = repository.GetByIdAsync(id);
+            var user = await repository.GetByIdAsync(id);
             if(user == null) return NotFound();
             await repository.DeleteAsync(id);
             await repository.SaveChangesAsync();

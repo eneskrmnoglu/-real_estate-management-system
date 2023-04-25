@@ -11,7 +11,6 @@ function Banner() {
                 <img src="https://www.hepsiemlak.com/_nuxt/img/evinyuvamolsun-roof.c63146d.png" />
               </span>
               <p className="ml-3 font-medium text-white truncate">
-                <span className="md:hidden">We announced a new product!</span>
                 <span className="hidden md:inline">
                   Evim Yuvan Olsun kampanyasıyla evinizi paylaşabilir ya da
                   afetzedelere kira yardımında bulunabilirsiniz.

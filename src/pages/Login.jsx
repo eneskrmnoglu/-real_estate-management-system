@@ -30,12 +30,14 @@ function Login() {
           showConfirmButton: false,
           timer: 1500,
         });
-        navigate("/anasayfa");
+        if (user.id == "85a87b8a-e273-481d-8a3a-93e3b7b23856")
+          navigate("/admin");
+        else navigate("/anasayfa");
       } else {
-        Swal.fire("Kullanıcı adı veya şifre hatalı");
+        Swal.fire();
       }
     } catch (error) {
-      Swal.fire(error);
+      Swal.fire("Kullanıcı adı veya şifre hatalı");
     }
   };
 

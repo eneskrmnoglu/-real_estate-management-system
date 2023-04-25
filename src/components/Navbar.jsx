@@ -8,6 +8,11 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { logout } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
+import {
+  setRealEstates,
+  filterRealEstatesByPropertyType,
+} from "../redux/realEstateSlice";
+import axios from "axios";
 
 const user = {
   name: "Tom Cook",
@@ -17,8 +22,9 @@ const user = {
 };
 const navigation = [
   { name: "Ana Sayfa", to: "/anasayfa", current: false },
-  { name: "Satılık", to: "/emlaklistesi", current: false },
-  { name: "Kiralık", to: "/emlaklistesi", current: false },
+  { name: "Tüm İlanlar", to: "/emlaklar", current: false },
+  { name: "Satılık", to: "/emlaklar", current: false },
+  { name: "Kiralık", to: "/emlaklar", current: false },
   { name: "Hakkımızda", to: "/hakkimizda", current: false },
   { name: "İletişim", to: "/iletisim", current: false },
   { name: "Ekibimiz", to: "/ekip", current: false },
@@ -38,6 +44,29 @@ function Navbar() {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const fetchRealEstates = async () => {
+    try {
+      const response = await axios.get("http://localhost:5298/api/RealEstate");
+      console.log(response.data);
+      dispatch(setRealEstates(response.data));
+    } catch (error) {
+      console.error("Gayrimenkul verileri alınırken hata oluştu:", error);
+    }
+  };
+
+  const handleClick = async (link) => {
+    if (link.name === "Tüm İlanlar") {
+      await fetchRealEstates();
+      navigate("/emlaklar");
+    } else if (link.name === "Satılık" || link.name === "Kiralık") {
+      await fetchRealEstates();
+      dispatch(filterRealEstatesByPropertyType(link.name));
+      navigate("/emlaklar");
+    } else {
+      navigate(link.to);
+    }
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -83,12 +112,13 @@ function Navbar() {
                   <div className="hidden md:ml-6 md:flex md:space-x-8">
                     {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
                     {navigation.map((link) => (
-                      <Link
-                        to={link.to}
+                      <button
+                        key={link.name}
+                        onClick={() => handleClick(link)}
                         className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                       >
                         {link.name}
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -185,7 +215,7 @@ function Navbar() {
                             <Menu.Item>
                               {({ active }) => (
                                 <Link
-                                  to="#"
+                                  to={`/profilduzenle/${user.id}`}
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
                                     "block px-4 py-2 text-sm text-gray-700"
@@ -198,7 +228,7 @@ function Navbar() {
                             <Menu.Item>
                               {({ active }) => (
                                 <Link
-                                  to="#"
+                                  to="/favoriler"
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
                                     "block px-4 py-2 text-sm text-gray-700"
@@ -211,7 +241,7 @@ function Navbar() {
                             <Menu.Item>
                               {({ active }) => (
                                 <Link
-                                  to="#"
+                                  to="/ilanlarim"
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
                                     "block px-4 py-2 text-sm text-gray-700"

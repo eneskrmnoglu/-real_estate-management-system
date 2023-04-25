@@ -1,24 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { addRealEstate } from "../redux/realEstateSlice";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PaymentForm from "../PaymentForm";
+import Swal from "sweetalert2";
 
 function Advertise() {
   const user = useSelector((state) => state.user.user);
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const fetchUser = async (userId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5298/api/Users/${user.id}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      alert("Kullanıcı bilgileri alınamadı.");
-    }
-  };
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
   const [realEstate, setRealEstate] = useState({
     Name: "",
@@ -43,8 +38,14 @@ function Advertise() {
     PhotoUrl3: "",
     Description: "",
     Price: 0,
-    UserId: user.id,
+    UserId: user ? user.id : null,
   });
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/girisyap");
+    }
+  }, [user, navigate]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -65,33 +66,60 @@ function Advertise() {
     });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      // Mevcut kullanıcıyı al
-      const currentUser = await fetchUser(user.id);
+  const handlePaymentSuccess = (paymentMethodId) => {
+    handleSubmit(paymentMethodId);
+  };
 
-      // Kullanıcıyı realEstate nesnesine ekle
-      const realEstateWithUser = { ...realEstate, User: currentUser };
+  const handleSubmit = async (paymentMethodId) => {
+    // Ödeme işlemi gerçekleştirin
+    setProcessing(true);
 
-      console.log("RealEstate object to be sent:", realEstateWithUser);
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentMethodId, amount: 20 }),
+    };
 
-      const response = await axios.post(
-        "http://localhost:5298/api/RealEstate",
-        realEstateWithUser,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log(response);
-      dispatch(addRealEstate(response.data));
-      alert("Gayrimenkul ekleme işlemi başarılı.");
-    } catch (error) {
-      console.error(error);
-      alert("Gayrimenkul ekleme işleminde hata oluştu.");
+    const response = await fetch(
+      "http://localhost:5298/api/checkout",
+      requestOptions
+    );
+    const data = await response.json();
+
+    if (data.success) {
+      try {
+        // Mevcut kullanıcıyı al
+        const realEstateWithUserId = { ...realEstate, UserId: user.id };
+
+        console.log("RealEstate object to be sent:", realEstateWithUserId);
+
+        const response = await axios.post(
+          "http://localhost:5298/api/RealEstate",
+          realEstateWithUserId,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+        dispatch(addRealEstate(response.data));
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Giriş işlemi başarılı.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } catch (error) {
+        console.error(error);
+        alert("Gayrimenkul ekleme işleminde hata oluştu.");
+      }
+    } else {
+      setError("Ödeme işlemi başarısız.");
     }
+
+    setProcessing(false);
   };
 
   return (
@@ -111,12 +139,12 @@ function Advertise() {
                   </h3>
                   <p className="mt-1 text-sm text-gray-600">
                     Sağ taraftaki form üzerinde gerekli bilgileri doldurup hemen
-                    ilan verebilirsiniz.
+                    ilan verebilirsiniz. İlan yayınlama ücreti 20₺'dir.
                   </p>
                 </div>
               </div>
               <div className="mt-5 md:mt-0 md:col-span-2">
-                <form action="#" onSubmit={handleSubmit}>
+                <form>
                   <div className="shadow overflow-hidden sm:rounded-md">
                     <div className="px-4 py-5 bg-white sm:p-6">
                       <div className="grid grid-cols-6 gap-6">
@@ -511,12 +539,14 @@ function Advertise() {
                       </div>
                     </div>
                     <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                      <button
-                        type="submit"
-                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        İlanı Yayınla
-                      </button>
+                      <PaymentForm
+                        amount={20}
+                        onSuccess={handlePaymentSuccess}
+                        setError={setError}
+                        error={error}
+                        setProcessing={setProcessing}
+                        processing={processing}
+                      />
                     </div>
                   </div>
                 </form>

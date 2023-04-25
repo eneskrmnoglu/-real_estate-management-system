@@ -2,6 +2,35 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+/* 
+<div className="mt-3">
+                  <h2 className="sr-only">Product information</h2>
+                  <p className="mt-10 text-2xl text-gray-900">
+                    Ücret: {estate.price} ₺
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="sr-only">Description</h3>
+
+                  <div
+                    className="text-base text-gray-700 space-y-6"
+                    dangerouslySetInnerHTML={{ __html: estate.description }}
+                  />
+                </div>
+
+                <form className=" flex justify-center">
+                  <div className="mt-10">
+                    <button
+                      type="submit"
+                      className="max-w-xs flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500 sm:w-full"
+                    >
+                      Favorilere Ekle
+                    </button>
+                  </div>
+                </form>
+*/
+
 public class RealEstate 
 {
 
@@ -29,9 +58,6 @@ public class RealEstate
     public string PhotoUrl3 { get; set; } // Fotoğraf
     public string Description { get; set; } // İlan bilgileri
     public int Price { get; set; } // Fiyat
-
-    [ForeignKey("User")]
     public Guid UserId {get; set;}
-    public virtual User User {get; set;}
 
 }
